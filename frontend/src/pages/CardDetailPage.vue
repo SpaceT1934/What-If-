@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { findUniverseCard, isSharedToSquare, saveSharedSquareStardust } from '../data/guestStardust'
+import KanshanGuide from '../components/KanshanGuide.vue'
 
 const route = useRoute()
 const showShareModal = ref(false)
@@ -146,6 +147,13 @@ const confirmShare = () => {
         </div>
       </section>
     </div>
+    <KanshanGuide
+      :steps="[
+        '这里记录了这颗星尘的节点链。',
+        '向下看阶段总结，能看到内容留下的影响。',
+        '想探索另一种走向，就试试 What If 改写。'
+      ]"
+    />
   </main>
 </template>
 

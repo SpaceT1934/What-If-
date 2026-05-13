@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { saveGuestStardust } from '../data/guestStardust'
 import type { Card } from '../types/card'
+import KanshanGuide from '../components/KanshanGuide.vue'
 
 type AnalysisState = 'idle' | 'loading' | 'ready' | 'empty'
 type GeneratedNode = {
@@ -118,16 +119,39 @@ const guestStory = `那段时间其实是从一个很普通的深夜开始的。
 
 const fallbackAnalysisSummary = computed(() => {
   if (analysisState.value === 'empty') {
-    return '那段时间，知乎没有留下你的痕迹。你仍然可以讲述故事，创建属于自己的认知星尘。'
+    return {
+      theme: '暂无行为痕迹',
+      overview: '那段时间，知乎没有留下足够痕迹。你仍然可以讲述故事，创建属于自己的星尘。',
+      metrics: ['可手动补充故事', '仍可生成星尘'],
+      sections: [
+        { label: '轨迹状态', items: ['系统没有读取到稳定的浏览与搜索线索。'] },
+      ],
+      shift: '这次星尘将更多依赖你的主动讲述，而不是行为数据。',
+      question: '那段时期发生了什么？',
+    }
   }
 
-  return `从 ${formatCnDate(form.startDate)} 到 ${formatCnDate(form.endDate)}，
-你高频浏览「星际穿越」「诺兰电影时间感」。
-点赞了关于「迷茫时期为什么会沉迷诺兰」的回答。
-深夜（23:00-02:00）多次搜索「诺兰电影观看顺序」「星际穿越想表达什么」。
-系统猜测：这段时间你是不是开始重新思考时间、选择和另一种人生可能？`
+  return {
+    theme: '深夜科幻与人生重启',
+    overview: `从 ${formatCnDate(form.startDate)} 到 ${formatCnDate(form.endDate)}，你的注意力从诺兰电影解析，逐渐转向时间、选择与人生可能。`,
+    metrics: ['深夜浏览集中出现', '科幻长文反复阅读', '人生选择类内容升温'],
+    sections: [
+      { label: '高频浏览', items: ['反复停留在《星际穿越》与诺兰解析。'] },
+      { label: '深夜搜索', items: ['23:00 后更常搜索电影顺序与时间主题。'] },
+      { label: '点赞倾向', items: ['更偏向收藏迷茫、选择与重启人生回答。'] },
+    ],
+    shift: '兴趣从电影本身，迁移到“另一种人生可能”的讨论。',
+    question: '你是否正在想换一种活法？',
+  }
 })
-const analysisSummary = ref('')
+const analysisReport = ref({
+  theme: '',
+  overview: '',
+  metrics: [] as string[],
+  sections: [] as { label: string; items: string[] }[],
+  shift: '',
+  question: '',
+})
 
 const wordCount = computed(() => form.story.length)
 const exceedLimit = computed(() => wordCount.value > 1000)
@@ -205,7 +229,7 @@ const runAnalysis = async () => {
   if (!form.startDate || !form.endDate || form.startDate > form.endDate) {
     stopProgress(analysisProgress, analysisProgressTimer, analysisStepTimer)
     analysisState.value = 'empty'
-    analysisSummary.value = fallbackAnalysisSummary.value
+    analysisReport.value = fallbackAnalysisSummary.value
     return
   }
   try {
@@ -221,14 +245,18 @@ const runAnalysis = async () => {
     if (!resp.ok) throw new Error(await resp.text())
     const data = await resp.json()
     const obs = data.observation || {}
-    analysisSummary.value = [
-      obs.overview || '',
-      (obs.high_frequency_browsing || []).length ? `高频浏览：${(obs.high_frequency_browsing || []).join('、')}` : '',
-      (obs.likes_tendency || []).length ? `点赞倾向：${(obs.likes_tendency || []).join('、')}` : '',
-      (obs.late_night_searches || []).length ? `深夜搜索：${(obs.late_night_searches || []).join('、')}` : '',
-      obs.interest_shift || '',
-      obs.reflective_question ? `系统追问：${obs.reflective_question}` : '',
-    ].filter(Boolean).join('\n')
+    analysisReport.value = {
+      theme: obs.theme || '认知轨迹观察',
+      overview: obs.overview || '',
+      metrics: (obs.key_metrics || []).slice(0, 4),
+      sections: [
+        { label: '高频浏览', items: (obs.high_frequency_browsing || []).slice(0, 2) },
+        { label: '深夜搜索', items: (obs.late_night_searches || []).slice(0, 2) },
+        { label: '点赞倾向', items: (obs.likes_tendency || []).slice(0, 2) },
+      ].filter((section) => section.items.length),
+      shift: obs.interest_shift || '',
+      question: obs.reflective_question || '',
+    }
     suggestionTopics.value = (data.stardust_tag_suggestions || []).slice(0, 6)
     analysisSource.value = 'online'
     stopProgress(analysisProgress, analysisProgressTimer, analysisStepTimer)
@@ -238,14 +266,14 @@ const runAnalysis = async () => {
     analysisSource.value = 'fallback'
     stopProgress(analysisProgress, analysisProgressTimer, analysisStepTimer)
     analysisState.value = 'ready'
-    analysisSummary.value = fallbackAnalysisSummary.value
+    analysisReport.value = fallbackAnalysisSummary.value
     suggestionTopics.value = []
   }
 }
 
 watch(() => [form.startDate, form.endDate], () => {
   analysisState.value = 'idle'
-  analysisSummary.value = ''
+  analysisReport.value = { theme: '', overview: '', metrics: [], sections: [], shift: '', question: '' }
   analysisError.value = ''
   suggestionTopics.value = []
   analysisProgress.value = 0
@@ -414,7 +442,34 @@ onMounted(() => {
                     {{ analysisSource === 'online' ? '系统在线推演' : '本地回退结果' }}
                   </span>
                 </div>
-                <p class="analysis-text whitespace-pre-line">{{ analysisSummary }}</p>
+                <div class="analysis-report">
+                  <div class="analysis-theme">
+                    <span>本阶段主题</span>
+                    <strong>{{ analysisReport.theme || '认知轨迹观察' }}</strong>
+                  </div>
+
+                  <p v-if="analysisReport.overview" class="analysis-text">{{ analysisReport.overview }}</p>
+
+                  <div v-if="analysisReport.metrics.length" class="metric-row">
+                    <span v-for="metric in analysisReport.metrics" :key="metric">{{ metric }}</span>
+                  </div>
+
+                  <div v-if="analysisReport.sections.length" class="observation-list">
+                    <section
+                      v-for="section in analysisReport.sections"
+                      :key="section.label"
+                      class="observation-item"
+                    >
+                      <h4>{{ section.label }}</h4>
+                      <ul>
+                        <li v-for="item in section.items" :key="item">{{ item }}</li>
+                      </ul>
+                    </section>
+                  </div>
+
+                  <p v-if="analysisReport.shift" class="shift-line">{{ analysisReport.shift }}</p>
+                  <p v-if="analysisReport.question" class="question-line">系统追问：{{ analysisReport.question }}</p>
+                </div>
                 <p v-if="analysisError" class="mt-3 rounded-xl border border-rose-400/20 bg-rose-500/10 p-3 text-xs leading-5 text-rose-100/80">
                   后端调用未成功：{{ analysisError }}
                 </p>
@@ -594,6 +649,13 @@ onMounted(() => {
         </div>
       </section>
     </div>
+    <KanshanGuide
+      :steps="[
+        '先选一段时间轨迹，让系统读取这段时期的线索。',
+        '再补充你的故事，越具体越容易形成星尘。',
+        '最后生成预览，满意后加入主宇宙。'
+      ]"
+    />
   </main>
 </template>
 
@@ -762,6 +824,95 @@ onMounted(() => {
   color: rgba(226, 232, 240, 0.76);
   font-size: 14px;
   line-height: 1.8;
+}
+
+.analysis-report {
+  margin-top: 12px;
+}
+
+.analysis-theme {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.analysis-theme span {
+  color: rgba(147, 197, 253, 0.62);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.analysis-theme strong {
+  color: rgba(248, 250, 252, 0.95);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.metric-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.metric-row span {
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  border-radius: 9999px;
+  background: rgba(14, 165, 233, 0.08);
+  color: rgba(191, 219, 254, 0.86);
+  font-size: 12px;
+  padding: 5px 9px;
+}
+
+.observation-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.observation-item {
+  border-left: 1px solid rgba(125, 211, 252, 0.24);
+  padding-left: 11px;
+}
+
+.observation-item h4 {
+  color: rgba(147, 197, 253, 0.86);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.observation-item ul {
+  margin-top: 5px;
+  display: grid;
+  gap: 4px;
+}
+
+.observation-item li {
+  color: rgba(226, 232, 240, 0.78);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.shift-line,
+.question-line {
+  margin-top: 12px;
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.shift-line {
+  background: rgba(15, 23, 42, 0.42);
+  color: rgba(226, 232, 240, 0.78);
+}
+
+.question-line {
+  border: 1px solid rgba(168, 85, 247, 0.18);
+  background: rgba(168, 85, 247, 0.08);
+  color: rgba(233, 213, 255, 0.88);
 }
 
 .suggestion-pill,

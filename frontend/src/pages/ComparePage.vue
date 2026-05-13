@@ -5,6 +5,7 @@ import { findUniverseCard, saveGuestStardust } from '../data/guestStardust'
 import { generateWhatIf } from '../data/whatIf'
 import type { Card, Node } from '../types/card'
 import type { WhatIfScenario, ZhihuSearchResult } from '../types/whatif'
+import KanshanGuide from '../components/KanshanGuide.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -454,6 +455,13 @@ const saveParallelStardust = () => {
         未找到对应对比数据。
       </section>
     </div>
+    <KanshanGuide
+      :steps="[
+        '这里只改写第一个节点的一小段。',
+        '保持人物底色不变，系统会推演另一条分支。',
+        '满意后保存，它会回到主宇宙旁边。'
+      ]"
+    />
   </main>
 </template>
 

@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { getMainUniverseCards, getParallelStardustByParent } from '../data/guestStardust'
+import KanshanGuide from '../components/KanshanGuide.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -221,7 +222,7 @@ const goDetail = (id: string) => {
           @keydown.space.prevent="goDetail(bubble.card.id)"
         >
           <div class="memory-scene" />
-          <img class="memory-kanshan" src="/images/Liukanshan-main.png" alt="" />
+          <img class="memory-kanshan" src="/images/liukanshan-main.png" alt="" />
           <div class="memory-noise" />
 
           <div class="memory-label">
@@ -279,6 +280,14 @@ const goDetail = (id: string) => {
         </div>
       </div>
     </section>
+    <KanshanGuide
+      :steps="[
+        '这里是你的主宇宙。点击一颗星尘，回看人生轨迹。',
+        '悬停星尘，可以看到它旁边的平行分支。',
+        '想记录新阶段，就点左侧的新增星尘。',
+        '想看看别人的星尘，可以进入看山宇宙广场。'
+      ]"
+    />
   </main>
 </template>
 

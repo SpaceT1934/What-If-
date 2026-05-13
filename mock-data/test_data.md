@@ -18,10 +18,10 @@ visitor_mock_001
 
 ### Record_001
 标题：
-为什么很多人看完《星际穿越》后会产生一种巨大的孤独感？
+世界微尘里，其唯爱与憎——《星际穿越》影评
 
 链接：
-https://www.zhihu.com/question/311902233
+https://zhuanlan.zhihu.com/p/23203103
 
 浏览时间：
 2026-01-14 00:42:13
@@ -33,10 +33,10 @@ https://www.zhihu.com/question/311902233
 
 ### Record_002
 标题：
-诺兰电影为什么总给人一种“时间被折叠”的感觉？
+影推荐 | 星际穿越——我一次呼吸划过你一辈子的岁月
 
 链接：
-https://www.zhihu.com/question/412948172
+https://zhuanlan.zhihu.com/p/36255940
 
 浏览时间：
 2026-01-16 01:08:52
@@ -48,10 +48,10 @@ https://www.zhihu.com/question/412948172
 
 ### Record_003
 标题：
-《盗梦空间》到底讲了一个怎样的故事？
+诺兰三大封神之作，为什么它可以排第一
 
 链接：
-https://www.zhihu.com/question/20441112
+https://zhuanlan.zhihu.com/p/176878394
 
 浏览时间：
 2026-01-20 23:47:05
@@ -66,7 +66,7 @@ https://www.zhihu.com/question/20441112
 为什么《信条》会让人“看不懂但很震撼”？
 
 链接：
-https://www.zhihu.com/question/419281023
+https://zhuanlan.zhihu.com/p/255288525
 
 浏览时间：
 2026-02-03 01:21:42
@@ -95,10 +95,10 @@ https://www.zhihu.com/question/520381731
 
 ### Answer_Record_001
 回答标题：
-《星际穿越》真正震撼人的，其实不是科幻，而是时间
+视听盛宴：诺兰的IMAX情结
 
 链接：
-https://www.zhihu.com/question/311902233/answer/1982220031
+https://zhuanlan.zhihu.com/p/235068136
 
 浏览时间：
 2026-01-14 00:50:44
@@ -110,10 +110,10 @@ https://www.zhihu.com/question/311902233/answer/1982220031
 
 ### Answer_Record_002
 回答标题：
-诺兰电影中的“时间感”，为什么让人上瘾？
+《盗梦空间》剧情与逻辑长篇解析，总有一些细节曾经被你忽略
 
 链接：
-https://www.zhihu.com/question/412948172/answer/2949201182
+https://zhuanlan.zhihu.com/p/75128772
 
 浏览时间：
 2026-01-18 01:12:30
@@ -125,10 +125,10 @@ https://www.zhihu.com/question/412948172/answer/2949201182
 
 ### Answer_Record_003
 回答标题：
-第一次看《盗梦空间》的人，其实是在经历一场“认知入侵”
+如何评价《盗梦空间》？
 
 链接：
-https://www.zhihu.com/question/20441112/answer/329210121
+https://www.zhihu.com/question/25678709
 
 浏览时间：
 2026-01-26 23:58:19
@@ -140,10 +140,10 @@ https://www.zhihu.com/question/20441112/answer/329210121
 
 ### Answer_Record_004
 回答标题：
-为什么很多人在迷茫时期会突然迷上诺兰？
+诺兰：倒着讲故事，不是为了炫技
 
 链接：
-https://www.zhihu.com/question/591028213/answer/3820191221
+https://zhuanlan.zhihu.com/p/2027496190158153512
 
 浏览时间：
 2026-02-19 01:42:08

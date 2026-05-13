@@ -77,6 +77,8 @@ class AnalyzeRequest(BaseModel):
 
 
 class TrajectoryObservation(BaseModel):
+    theme: str = ""
+    key_metrics: list[str] = Field(default_factory=list)
     overview: str
     high_frequency_browsing: list[str]
     late_night_searches: list[str]
@@ -580,25 +582,30 @@ async def guest_analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
     system_prompt = (
         "你是“看山平行宇宙”的认知轨迹分析引擎。"
         "你必须基于给定 markdown 行为数据生成结构化 JSON，不要输出任何多余文本。"
+        "输出风格要像年度报告中的个人洞察：主题明确、数据可感、短句分条、克制精炼。"
     )
     user_prompt = f"""
 任务：
 1) 用户为游客模式，时间范围为 {payload.start_date} 到 {payload.end_date}。
 2) 请阅读行为数据并输出“认知轨迹观察”与“星尘标签建议”。
 3) 必须保持知乎语境，强调“内容如何影响认知轨迹”。
+4) 不要写成长文，不要写散文；必须像年度报告：有主题、有数据、有分条观察。
+5) 每条观察尽量 18-32 字，最多 3 条；数字必须来自行为数据或基于行为数据保守概括。
 
 输出 JSON 结构（严格）：
 {{
   "time_range": "YYYY-MM-DD ~ YYYY-MM-DD",
   "observation": {{
-    "overview": "80-140字",
-    "high_frequency_browsing": ["条目1", "条目2", "条目3"],
-    "late_night_searches": ["条目1", "条目2"],
-    "likes_tendency": ["条目1", "条目2"],
-    "interest_shift": "60-120字",
-    "reflective_question": "一句引导式问题"
+    "theme": "8-14字主题，例如：深夜科幻与人生重启",
+    "key_metrics": ["深夜浏览 6 次", "连续搜索 4 个关键词", "收藏长回答 3 篇"],
+    "overview": "一句总述，35-55字",
+    "high_frequency_browsing": ["18-32字观察1", "18-32字观察2"],
+    "late_night_searches": ["18-32字观察1", "18-32字观察2"],
+    "likes_tendency": ["18-32字观察1", "18-32字观察2"],
+    "interest_shift": "一句变化总结，35-55字",
+    "reflective_question": "一句引导式问题，20字以内"
   }},
-  "stardust_tag_suggestions": ["标签1", "标签2", "标签3", "标签4", "标签5"],
+  "stardust_tag_suggestions": ["2-6字标签1", "2-6字标签2", "2-6字标签3", "2-6字标签4", "2-6字标签5"],
   "raw_excerpt_links": ["https://www.zhihu.com/....", "...最多2个"]
 }}
 

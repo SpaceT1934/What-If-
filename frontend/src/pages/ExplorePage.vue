@@ -4,6 +4,7 @@ import { RouterLink, useRouter } from 'vue-router'
 import exploreCards from '../data/exploreCards'
 import { getSharedSquareStardust } from '../data/guestStardust'
 import type { Card } from '../types/card'
+import KanshanGuide from '../components/KanshanGuide.vue'
 
 type StarTone = 'blue' | 'purple' | 'gold' | 'cyan'
 
@@ -294,7 +295,7 @@ onUnmounted(() => {
           <span class="star-noise" />
 
           <div class="star-title-wrap">
-            <p class="community-mark">{{ star.card.source_type === 'shared' ? '我分享的星尘' : '半山星尘' }}</p>
+            <p class="community-mark">{{ star.card.source_type === 'shared' ? '我分享的星尘' : '看山星尘' }}</p>
             <p class="star-title">{{ star.card.title }}</p>
             <p class="star-time">{{ star.card.time_range }}</p>
             <p class="star-tags">{{ star.tags.map((tag) => `#${tag}`).join(' ') }}</p>
@@ -307,6 +308,13 @@ onUnmounted(() => {
         </button>
       </div>
     </section>
+    <KanshanGuide
+      :steps="[
+        '这里是看山宇宙广场，漂浮着他人的看山星尘。',
+        '悬停星尘，可以先看关键词和阶段状态。',
+        '点击星尘，就能进入那段人生轨迹。'
+      ]"
+    />
   </main>
 </template>
 
