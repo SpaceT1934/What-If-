@@ -6,13 +6,15 @@
 
 ```text
 what-if-universe/
-├── frontend/    # Vue3 + Vite 前端应用，部署到 Vercel
-├── backend/     # FastAPI 后端服务，部署到 Render
-├── mock-data/   # Markdown mock 数据
-├── README.md
-├── package.json # 根目录统一脚本，方便本地运行和 Vercel 构建
-├── render.yaml  # Render Blueprint 配置
-└── vercel.json  # Vercel 前端部署配置
+├── frontend/     # Vue3 + Vite 前端
+├── backend/      # FastAPI 后端
+├── mock-data/    # Markdown mock 数据，后端会读取
+├── Dockerfile    # 腾讯云 CloudBase 云托管后端容器
+├── .dockerignore
+├── package.json  # 根目录前端构建脚本
+├── vercel.json   # 可选：Vercel 前端配置
+├── render.yaml   # 可选：Render 后端配置
+└── README.md
 ```
 
 ## 本地运行
@@ -31,8 +33,12 @@ cp .env.example .env
 
 ```env
 LLM_PROVIDER=ark
-ARK_API_KEY=你的字节Ark API Key
+ARK_API_KEY=你的字节 Ark API Key
+ARK_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
+ARK_MODEL=doubao-seed-1-6-flash-250828
+ARK_FALLBACK_MODELS=doubao-seed-1-6-flash-250828
 ZHIHU_ACCESS_SECRET=你的知乎开放平台 Access Secret
+ZHIHU_SEARCH_URL=https://developer.zhihu.com/api/v1/content/zhihu_search
 CORS_ALLOW_ORIGINS=http://127.0.0.1:5173,http://localhost:5173
 ```
 
@@ -50,7 +56,7 @@ npm install
 cp .env.example .env
 ```
 
-本地 `.env`：
+本地 `frontend/.env`：
 
 ```env
 VITE_API_BASE_URL=http://127.0.0.1:8000
@@ -68,86 +74,117 @@ npm run dev
 http://127.0.0.1:5173
 ```
 
-## 部署方案
+## 腾讯云 CloudBase 部署
 
-当前推荐：
+推荐现在使用：
 
-- 前端：Vercel
-- 后端：Render
+- 前端：CloudBase 静态网站托管 / Web 应用托管
+- 后端：CloudBase 云托管
 
-### 1. 部署后端到 Render
+### 1. 部署后端到 CloudBase 云托管
 
-1. 将代码 push 到 GitHub。
-2. 打开 Render，选择 `New +` -> `Blueprint`。
-3. 选择这个 GitHub 仓库。
-4. Render 会读取根目录 `render.yaml`，创建 `kanshan-universe-backend`。
-5. 在 Render 服务 Environment 中添加：
+后端用根目录 `Dockerfile` 部署。注意不要选择 `backend/` 作为构建根目录，因为后端需要读取根目录的 `mock-data/`。
+
+CloudBase 云托管配置建议：
+
+```text
+代码目录 / 构建目录：仓库根目录
+构建方式：Dockerfile
+Dockerfile 路径：Dockerfile
+服务端口：3000
+公网访问：开启
+```
+
+环境变量：
 
 ```env
 LLM_PROVIDER=ark
-ARK_API_KEY=你的字节Ark API Key
+ARK_API_KEY=你的字节 Ark API Key
 ARK_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
 ARK_MODEL=doubao-seed-1-6-flash-250828
 ARK_FALLBACK_MODELS=doubao-seed-1-6-flash-250828
 ZHIHU_ACCESS_SECRET=你的知乎开放平台 Access Secret
 ZHIHU_SEARCH_URL=https://developer.zhihu.com/api/v1/content/zhihu_search
-CORS_ALLOW_ORIGINS=https://你的-vercel-域名.vercel.app
+CORS_ALLOW_ORIGINS=https://你的前端域名
 ```
 
-部署完成后测试：
+后端部署成功后，访问：
 
 ```text
-https://你的-render-service.onrender.com/health
+https://你的-cloudbase-后端域名/health
 ```
 
-### 2. 部署前端到 Vercel
+能看到健康检查返回，就说明后端可用。
 
-1. 打开 Vercel，导入同一个 GitHub 仓库。
-2. Framework Preset 选择 `Vite` 或保持自动识别。
-3. Root Directory 保持仓库根目录。
-4. Vercel 会使用根目录 `vercel.json`：
+### 2. 部署前端到 CloudBase
 
-```json
-{
-  "installCommand": "npm install",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist"
-}
+前端使用仓库根目录构建即可，根目录 `package.json` 会自动进入 `frontend/` 构建，并把产物同步到根目录 `dist/`。
+
+CloudBase 前端构建配置：
+
+```text
+安装命令：npm install
+构建命令：npm run build
+发布目录：dist
 ```
 
-5. 在 Vercel Environment Variables 添加：
+前端环境变量：
 
 ```env
-VITE_API_BASE_URL=https://你的-render-service.onrender.com
+VITE_API_BASE_URL=https://你的-cloudbase-后端域名
 ```
 
-6. 部署完成后，把最终 Vercel 域名回填到 Render 的：
+如果 CloudBase 的前端环境变量没有在构建时生效，也可以在 `frontend/.env.production` 里写入同样内容后再部署，但不要把真实密钥放进前端。
+
+### 3. 回填 CORS
+
+前端部署完成后，拿到前端域名，例如：
+
+```text
+https://你的前端域名
+```
+
+回到 CloudBase 后端云托管，把环境变量改成：
 
 ```env
-CORS_ALLOW_ORIGINS=https://你的-vercel-域名.vercel.app
+CORS_ALLOW_ORIGINS=https://你的前端域名,http://localhost:5173,http://127.0.0.1:5173
 ```
 
-然后重新部署一次 Render 后端。
+然后重新部署后端。
 
 ## 部署检查
 
-后端健康检查：
+1. 打开后端健康检查：
 
 ```text
-https://你的-render-service.onrender.com/health
+https://你的-cloudbase-后端域名/health
 ```
 
-前端需要确认：
+2. 打开前端页面：
 
-- Landing Page 可以进入信件页
-- 游客进入可以进入主宇宙
-- 创建人生星尘可以调用后端
-- What If 平行宇宙可以调用后端
-- 知乎搜索链接能出现在节点旁
-- 分享到宇宙广场只写入浏览器 localStorage
+```text
+https://你的-cloudbase-前端域名
+```
 
-## 重要说明
+3. 测试以下功能：
 
-- 不要提交 `backend/.env`。
-- 前端新增星尘、平行宇宙星尘、分享到广场的数据，目前都只存在用户浏览器 localStorage。
-- Render Free 服务冷启动会比较慢，首次系统推演可能需要等待几十秒。
+- 游客进入主宇宙
+- 创建人生星尘
+- What If 平行宇宙推演
+- 节点旁知乎搜索链接
+- 分享星尘到宇宙广场
+
+## 不要上传 / 不要打包
+
+```text
+backend/.env
+backend/.env.save
+backend/.venv/
+backend/__pycache__/
+frontend/node_modules/
+frontend/dist/
+dist/
+frontend/public/model/kanshan.glb
+```
+
+`frontend/public/model/kanshan.glb` 当前约 70MB，GitHub 网页上传会失败。先不上传也可以，只会影响阶段看山 3D 模型展示，不影响核心功能。
