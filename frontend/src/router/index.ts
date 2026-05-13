@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import LandingPage from '../pages/LandingPage.vue'
 import LetterPage from '../pages/LetterPage.vue'
 import HomePage from '../pages/HomePage.vue'
@@ -8,7 +8,7 @@ import CardDetailPage from '../pages/CardDetailPage.vue'
 import ComparePage from '../pages/ComparePage.vue'
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes: [
     { path: '/', redirect: '/landing' },
     { path: '/landing', name: 'landing', component: LandingPage },
