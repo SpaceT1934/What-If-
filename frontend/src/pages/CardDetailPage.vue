@@ -43,7 +43,8 @@ const confirmShare = () => {
     <div class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
       <RouterLink to="/home" class="text-sm font-medium text-blue-300 hover:text-blue-200">← 返回首页</RouterLink>
 
-      <section v-if="card" class="glass-card mt-5 rounded-2xl p-6 sm:p-7">
+      <section v-if="card" class="glass-card relative mt-5 overflow-hidden rounded-2xl p-6 sm:p-7">
+        <img class="detail-kanshan" :src="card.liu_kanshan_image || '/images/liukanshan-main.png'" alt="" />
         <header class="border-b border-slate-700/70 pb-5">
           <h1 class="text-2xl font-bold text-white sm:text-3xl">{{ card.title }}</h1>
           <p class="mt-2 text-sm text-slate-300">{{ card.time_range }}</p>
@@ -169,6 +170,17 @@ const confirmShare = () => {
   background: rgba(15, 23, 42, 0.58);
   backdrop-filter: blur(8px);
   box-shadow: 0 0 0 1px rgba(191, 219, 254, 0.08) inset, 0 0 32px rgba(37, 99, 235, 0.14);
+}
+
+.detail-kanshan {
+  position: absolute;
+  right: 1.1rem;
+  top: 1rem;
+  z-index: 4;
+  width: min(112px, 24vw);
+  opacity: 0.96;
+  filter: saturate(1.02) brightness(1.05) drop-shadow(0 0 16px rgba(96, 165, 250, 0.24));
+  pointer-events: none;
 }
 
 .glow-tag {

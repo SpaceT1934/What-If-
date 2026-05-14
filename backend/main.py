@@ -4,12 +4,15 @@ import json
 import os
 import re
 import time
+import base64
 from pathlib import Path
 from typing import Any
+from urllib.parse import parse_qs, urlencode, urlparse
 
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field
 
 
@@ -60,6 +63,12 @@ ZHIHU_SEARCH_URL = os.getenv(
     "ZHIHU_SEARCH_URL",
     "https://developer.zhihu.com/api/v1/content/zhihu_search",
 )
+ZHIHU_OAUTH_BASE_URL = os.getenv("ZHIHU_OAUTH_BASE_URL", "https://openapi.zhihu.com")
+ZHIHU_OAUTH_APP_ID = os.getenv("ZHIHU_OAUTH_APP_ID", "")
+ZHIHU_OAUTH_APP_KEY = os.getenv("ZHIHU_OAUTH_APP_KEY", "")
+ZHIHU_OAUTH_REDIRECT_URI = os.getenv("ZHIHU_OAUTH_REDIRECT_URI", "")
+FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://127.0.0.1:5173")
+OAUTH_FRONTEND_COOKIE = "what_if_frontend_base"
 MOONSHOT_FALLBACK_BASE_URLS = [
     item.strip().rstrip("/")
     for item in os.getenv(
@@ -336,6 +345,106 @@ def current_provider() -> dict[str, Any]:
     }
 
 
+def normalize_frontend_base(base_url: str) -> str:
+    normalized = base_url.strip().rstrip("/")
+    if normalized.startswith("www.127.0.0.1"):
+        normalized = f"http://{normalized.removeprefix('www.')}"
+    if normalized.startswith("www.localhost"):
+        normalized = f"http://{normalized.removeprefix('www.')}"
+    if normalized.startswith("127.0.0.1") or normalized.startswith("localhost"):
+        normalized = f"http://{normalized}"
+    normalized = normalized.replace("://www.127.0.0.1", "://127.0.0.1")
+    normalized = normalized.replace("://www.localhost", "://localhost")
+    return normalized
+
+
+def is_allowed_frontend_base(base_url: str) -> bool:
+    base_url = normalize_frontend_base(base_url)
+    parsed = urlparse(base_url)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        return False
+    hostname = parsed.hostname or ""
+    configured_host = urlparse(FRONTEND_BASE_URL).hostname or ""
+    return (
+        hostname in {"127.0.0.1", "localhost"}
+        or hostname.endswith(".tcloudbaseapp.com")
+        or bool(configured_host and hostname == configured_host)
+    )
+
+
+def frontend_base_from_request(request: Request) -> str:
+    explicit_frontend = normalize_frontend_base(request.query_params.get("frontend", ""))
+    if explicit_frontend and is_allowed_frontend_base(explicit_frontend):
+        return explicit_frontend
+
+    origin = request.headers.get("origin", "").strip()
+    if origin and is_allowed_frontend_base(origin):
+        return normalize_frontend_base(origin)
+
+    referer = request.headers.get("referer", "").strip()
+    if referer:
+        parsed = urlparse(referer)
+        referer_base = f"{parsed.scheme}://{parsed.netloc}" if parsed.scheme and parsed.netloc else ""
+        if referer_base and is_allowed_frontend_base(referer_base):
+            return normalize_frontend_base(referer_base)
+
+    return normalize_frontend_base(FRONTEND_BASE_URL)
+
+
+def encode_oauth_state(frontend_base: str) -> str:
+    encoded = base64.urlsafe_b64encode(frontend_base.encode("utf-8")).decode("ascii")
+    return encoded.rstrip("=")
+
+
+def decode_oauth_state(state: str) -> str:
+    if not state:
+        return ""
+    try:
+        padded = state + "=" * (-len(state) % 4)
+        decoded = base64.urlsafe_b64decode(padded.encode("ascii")).decode("utf-8")
+        return normalize_frontend_base(decoded)
+    except Exception:  # noqa: BLE001
+        parsed_state = parse_qs(state)
+        return normalize_frontend_base((parsed_state.get("frontend") or [""])[0])
+
+
+def frontend_base_from_state(state: str) -> str:
+    if not state:
+        return normalize_frontend_base(FRONTEND_BASE_URL)
+    state_base = decode_oauth_state(state)
+    if state_base and is_allowed_frontend_base(state_base):
+        return state_base
+    return normalize_frontend_base(FRONTEND_BASE_URL)
+
+
+def frontend_base_from_callback(request: Request) -> str:
+    cookie_base = normalize_frontend_base(request.cookies.get(OAUTH_FRONTEND_COOKIE, ""))
+    if cookie_base and is_allowed_frontend_base(cookie_base):
+        return cookie_base
+    return frontend_base_from_state(request.query_params.get("state", ""))
+
+
+def frontend_letter_url(params: dict[str, str] | None = None, base_url: str | None = None) -> str:
+    base = normalize_frontend_base(base_url or FRONTEND_BASE_URL)
+    query = urlencode(params or {})
+    return f"{base}/#/letter?{query}" if query else f"{base}/#/letter"
+
+
+def frontend_landing_url(params: dict[str, str] | None = None, base_url: str | None = None) -> str:
+    base = normalize_frontend_base(base_url or FRONTEND_BASE_URL)
+    query = urlencode(params or {})
+    return f"{base}/#/?{query}" if query else f"{base}/#/"
+
+
+def oauth_redirect_uri(request: Request | None = None) -> str:
+    configured_uri = ZHIHU_OAUTH_REDIRECT_URI.strip()
+    if configured_uri:
+        return configured_uri
+    if request:
+        return str(request.url_for("zhihu_oauth_callback"))
+    return ""
+
+
 async def check_llm_auth() -> list[dict[str, Any]]:
     provider = current_provider()
     api_key = provider["api_key"]
@@ -542,6 +651,7 @@ async def health() -> dict[str, Any]:
         "ark_fallback_models": ARK_FALLBACK_MODELS,
         "zhihu_search_configured": bool(os.getenv("ZHIHU_ACCESS_SECRET", "").strip()),
         "zhihu_search_url": ZHIHU_SEARCH_URL,
+        "zhihu_oauth_configured": bool(ZHIHU_OAUTH_APP_ID and ZHIHU_OAUTH_APP_KEY and ZHIHU_OAUTH_REDIRECT_URI),
         "mock_data_exists": DEFAULT_MOCK_PATH.exists(),
     }
 
@@ -571,6 +681,141 @@ async def debug_llm_auth() -> dict[str, Any]:
         "key_fingerprint": f"{api_key[:8]}...{api_key[-6:]}" if api_key else "",
         "checks": await check_llm_auth(),
     }
+
+
+@app.get("/api/auth/zhihu/login")
+async def zhihu_oauth_login(request: Request) -> RedirectResponse:
+    redirect_uri = oauth_redirect_uri(request)
+    frontend_base = frontend_base_from_request(request)
+    if not ZHIHU_OAUTH_APP_ID or not redirect_uri:
+        return RedirectResponse(
+            frontend_landing_url(
+                {
+                    "zhihu_login": "failed",
+                    "reason": "oauth_not_configured",
+                },
+                base_url=frontend_base,
+            )
+        )
+
+    query = urlencode({
+        "redirect_uri": redirect_uri,
+        "app_id": ZHIHU_OAUTH_APP_ID,
+        "response_type": "code",
+        "state": encode_oauth_state(frontend_base),
+    })
+    response = RedirectResponse(f"{ZHIHU_OAUTH_BASE_URL.rstrip('/')}/authorize?{query}")
+    response.set_cookie(
+        key=OAUTH_FRONTEND_COOKIE,
+        value=frontend_base,
+        max_age=600,
+        httponly=True,
+        samesite="lax",
+    )
+    return response
+
+
+@app.get("/api/auth/zhihu/callback")
+async def zhihu_oauth_callback(request: Request) -> RedirectResponse:
+    redirect_uri = oauth_redirect_uri(request)
+    query_params = request.query_params
+    frontend_base = frontend_base_from_callback(request)
+    oauth_code = (
+        query_params.get("code")
+        or query_params.get("authorization_code")
+        or query_params.get("auth_code")
+        or query_params.get("authorizationCode")
+    )
+    zhihu_error = query_params.get("error") or query_params.get("reason") or ""
+    if not oauth_code:
+        return RedirectResponse(
+            frontend_landing_url(
+                {
+                    "zhihu_login": "failed",
+                    "reason": zhihu_error or "missing_code",
+                    "received": ",".join(query_params.keys()) or "none",
+                },
+                base_url=frontend_base,
+            )
+        )
+    if not ZHIHU_OAUTH_APP_ID or not ZHIHU_OAUTH_APP_KEY or not redirect_uri:
+        return RedirectResponse(
+            frontend_landing_url(
+                {
+                    "zhihu_login": "failed",
+                    "reason": "oauth_not_configured",
+                },
+                base_url=frontend_base,
+            )
+        )
+
+    async with httpx.AsyncClient(timeout=30) as client:
+        token_resp = await client.post(
+            f"{ZHIHU_OAUTH_BASE_URL.rstrip('/')}/access_token",
+            data={
+                "app_id": ZHIHU_OAUTH_APP_ID,
+                "app_key": ZHIHU_OAUTH_APP_KEY,
+                "grant_type": "authorization_code",
+                "redirect_uri": redirect_uri,
+                "code": oauth_code,
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        if token_resp.status_code >= 400:
+            return RedirectResponse(
+                frontend_landing_url(
+                    {
+                        "zhihu_login": "failed",
+                        "reason": "token_failed",
+                        "status": str(token_resp.status_code),
+                    },
+                    base_url=frontend_base,
+                )
+            )
+
+        token_data = token_resp.json()
+        access_token = token_data.get("access_token")
+        if not access_token:
+            return RedirectResponse(
+                frontend_landing_url(
+                    {"zhihu_login": "failed", "reason": "missing_token"},
+                    base_url=frontend_base,
+                )
+            )
+
+        user_resp = await client.get(
+            f"{ZHIHU_OAUTH_BASE_URL.rstrip('/')}/user",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        if user_resp.status_code >= 400:
+            return RedirectResponse(
+                frontend_landing_url(
+                    {
+                        "zhihu_login": "failed",
+                        "reason": "user_failed",
+                        "status": str(user_resp.status_code),
+                    },
+                    base_url=frontend_base,
+                )
+            )
+
+        user_data = user_resp.json()
+
+    nickname = (
+        user_data.get("fullname")
+        or user_data.get("name")
+        or user_data.get("headline")
+        or "知乎用户"
+    )
+    return RedirectResponse(
+        frontend_letter_url(
+            {
+                "zhihu_login": "success",
+                "zhihu_name": str(nickname),
+            },
+            base_url=frontend_base,
+        )
+    )
 
 
 @app.post("/api/guest/analyze", response_model=AnalyzeResponse)

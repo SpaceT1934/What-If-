@@ -6,6 +6,10 @@ const STORAGE_KEY = 'what-if-universe:guest-stardust'
 const SHARED_SQUARE_KEY = 'what-if-universe:shared-square-stardust'
 
 const isBrowser = () => typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
+const withDefaultKanshanImage = (card: Card): Card => ({
+  ...card,
+  liu_kanshan_image: card.liu_kanshan_image || '/images/liukanshan/confusion.png',
+})
 
 export const getGuestStardust = (): Card[] => {
   if (!isBrowser()) return []
@@ -13,7 +17,7 @@ export const getGuestStardust = (): Card[] => {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (!raw) return []
     const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : []
+    return Array.isArray(parsed) ? parsed.map(withDefaultKanshanImage) : []
   } catch {
     return []
   }
@@ -32,7 +36,7 @@ export const getSharedSquareStardust = (): Card[] => {
     const raw = window.localStorage.getItem(SHARED_SQUARE_KEY)
     if (!raw) return []
     const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : []
+    return Array.isArray(parsed) ? parsed.map(withDefaultKanshanImage) : []
   } catch {
     return []
   }

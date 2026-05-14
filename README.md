@@ -39,6 +39,10 @@ ARK_MODEL=doubao-seed-1-6-flash-250828
 ARK_FALLBACK_MODELS=doubao-seed-1-6-flash-250828
 ZHIHU_ACCESS_SECRET=你的知乎开放平台 Access Secret
 ZHIHU_SEARCH_URL=https://developer.zhihu.com/api/v1/content/zhihu_search
+ZHIHU_OAUTH_APP_ID=你的知乎 OAuth App ID
+ZHIHU_OAUTH_APP_KEY=你的知乎 OAuth App Key
+ZHIHU_OAUTH_REDIRECT_URI=http://127.0.0.1:8000/api/auth/zhihu/callback
+FRONTEND_BASE_URL=http://127.0.0.1:5173
 CORS_ALLOW_ORIGINS=http://127.0.0.1:5173,http://localhost:5173
 ```
 
@@ -105,6 +109,10 @@ ARK_MODEL=doubao-seed-1-6-flash-250828
 ARK_FALLBACK_MODELS=doubao-seed-1-6-flash-250828
 ZHIHU_ACCESS_SECRET=你的知乎开放平台 Access Secret
 ZHIHU_SEARCH_URL=https://developer.zhihu.com/api/v1/content/zhihu_search
+ZHIHU_OAUTH_APP_ID=你的知乎 OAuth App ID
+ZHIHU_OAUTH_APP_KEY=你的知乎 OAuth App Key
+ZHIHU_OAUTH_REDIRECT_URI=https://你的后端域名/api/auth/zhihu/callback
+FRONTEND_BASE_URL=https://你的前端域名
 CORS_ALLOW_ORIGINS=https://你的前端域名
 ```
 

@@ -1,9 +1,41 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
 
 const hasAgreed = ref(true)
+const route = useRoute()
 const showLoginModal = ref(false)
+const connectedZhihuName = ref('')
+
+const zhihuName = computed(() => {
+  const value = route.query.zhihu_name
+  return Array.isArray(value) ? value[0] : value
+})
+const loginFailed = computed(() => route.query.zhihu_login === 'failed')
+const loginFailureReason = computed(() => {
+  const reason = route.query.reason
+  return Array.isArray(reason) ? reason[0] : reason
+})
+const loginFailureReceived = computed(() => {
+  const received = route.query.received
+  return Array.isArray(received) ? received[0] : received
+})
+const loginFailureStatus = computed(() => {
+  const status = route.query.status
+  return Array.isArray(status) ? status[0] : status
+})
+
+const syncConnectedZhihuName = () => {
+  if (zhihuName.value) {
+    connectedZhihuName.value = zhihuName.value
+    window.localStorage.setItem('what-if-zhihu-name', zhihuName.value)
+    return
+  }
+  connectedZhihuName.value = window.localStorage.getItem('what-if-zhihu-name') || ''
+}
+
+onMounted(syncConnectedZhihuName)
+watch(zhihuName, syncConnectedZhihuName)
 </script>
 
 <template>
@@ -15,6 +47,13 @@ const showLoginModal = ref(false)
     </div>
     <div class="letter-particles" aria-hidden="true">
       <span v-for="index in 14" :key="index" class="particle" />
+    </div>
+
+    <div
+      v-if="connectedZhihuName"
+      class="zhihu-welcome fixed right-5 top-5 z-20 rounded-full px-4 py-2 text-xs font-medium text-slate-100/86 sm:right-8 sm:top-7"
+    >
+      欢迎，{{ connectedZhihuName }}
     </div>
 
     <section class="letter-card relative z-10 w-full max-w-[720px] rounded-3xl px-6 py-8 sm:px-10 sm:py-10">
@@ -52,6 +91,18 @@ const showLoginModal = ref(false)
         </span>
       </label>
 
+      <div v-if="connectedZhihuName" class="mt-4 rounded-2xl border border-blue-200/15 bg-blue-400/[0.07] px-4 py-3 text-sm text-blue-100/86">
+        已记录知乎到访：{{ connectedZhihuName }}。当前 Demo 仍通过游客模式进入。
+      </div>
+      <div v-else-if="loginFailed" class="mt-4 rounded-2xl border border-amber-200/15 bg-amber-400/[0.08] px-4 py-3 text-sm text-amber-100/86">
+        知乎授权未完成，你仍然可以使用游客模式体验。
+        <span v-if="loginFailureReason" class="mt-1 block text-xs text-amber-100/58">
+          调试信息：{{ loginFailureReason }}
+          <template v-if="loginFailureStatus"> / HTTP {{ loginFailureStatus }}</template>
+          <template v-if="loginFailureReceived"> / 收到参数 {{ loginFailureReceived }}</template>
+        </span>
+      </div>
+
       <div class="mt-8 flex flex-col gap-3 sm:flex-row">
         <RouterLink
           to="/home"
@@ -63,7 +114,10 @@ const showLoginModal = ref(false)
           游客进入
         </RouterLink>
         <button
-          class="secondary-entry inline-flex flex-1 items-center justify-center rounded-2xl px-5 py-3 text-sm font-medium text-slate-200/78 transition"
+          :class="[
+            'secondary-entry inline-flex flex-1 items-center justify-center rounded-2xl px-5 py-3 text-sm font-medium text-slate-200/78 transition',
+            hasAgreed ? '' : 'pointer-events-none opacity-45',
+          ]"
           type="button"
           @click="showLoginModal = true"
         >
@@ -76,9 +130,9 @@ const showLoginModal = ref(false)
       <button class="absolute inset-0 cursor-default bg-slate-950/62 backdrop-blur-sm" type="button" @click="showLoginModal = false" />
       <section class="modal-card relative w-full max-w-md rounded-3xl p-7 text-slate-100">
         <p class="text-xs font-medium tracking-wide text-slate-300/55">Zhihu Account</p>
-        <h2 class="mt-3 text-xl font-semibold text-white">知乎账号登录暂未开放</h2>
+        <h2 class="mt-3 text-xl font-semibold text-white">当前仅开放游客模式</h2>
         <p class="mt-5 text-sm leading-7 text-slate-200/72">
-          当前版本仍处于概念体验 Demo 阶段。为了避免授权链路影响体验，请先通过游客模式进入看山宇宙。
+          当前版本仍处于概念体验 Demo 阶段。知乎授权仅用于记录到访与展示昵称，暂不关联个人知乎数据。
         </p>
         <button class="primary-entry mt-7 w-full rounded-2xl px-5 py-3 text-sm font-medium text-white" type="button" @click="showLoginModal = false">
           我知道了
@@ -113,6 +167,13 @@ const showLoginModal = ref(false)
   box-shadow: 0 0 34px rgba(96, 165, 250, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(18px);
   animation: card-in 0.7s ease both;
+}
+
+.zhihu-welcome {
+  border: 1px solid rgba(191, 219, 254, 0.16);
+  background: rgba(15, 23, 42, 0.46);
+  box-shadow: 0 0 22px rgba(96, 165, 250, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px);
 }
 
 .primary-entry {

@@ -36,6 +36,7 @@ export const mockCards: Card[] = [
     ],
     summary: '这段星尘记录的是一次关于城市与人生节奏的重新判断。知乎内容让他意识到，城市选择不是面子问题，而是机会、关系、身体状态和长期生活质量之间的权衡。',
     liu_kanshan_state: '我不是逃离大城市，我只是开始认真选择自己的生活半径。',
+    liu_kanshan_image: '/images/liukanshan/city-choice.png',
   },
   {
     id: 'main-career-burnout',
@@ -75,6 +76,7 @@ export const mockCards: Card[] = [
     ],
     summary: '这段星尘从职业倦怠开始，经过识别问题、调整边界和重建掌控感，呈现了一个职场人从情绪耗竭中慢慢恢复的过程。知乎内容没有直接替她解决工作，但让她学会把痛苦具体化。',
     liu_kanshan_state: '我不是不想努力了，我只是终于学会保护自己的能量。',
+    liu_kanshan_image: '/images/liukanshan/confusion.png',
   },
   {
     id: 'main-english-learning',
@@ -114,6 +116,7 @@ export const mockCards: Card[] = [
     ],
     summary: '这段星尘记录了一个成年人从英语受挫到建立学习节奏的过程。知乎内容帮助他从盲目背词转向系统输入，也让他意识到，学习技能最重要的不是突然爆发，而是每天可持续地前进一点。',
     liu_kanshan_state: '我终于不再害怕从零开始，因为零也是一条路的起点。',
+    liu_kanshan_image: '/images/liukanshan/english-learning.png',
   },
   {
     id: 'main-reading-habit',
@@ -156,6 +159,7 @@ export const mockCards: Card[] = [
     ],
     summary: '这段星尘不是关于“高效读书”，而是关于注意力和生活节奏的修复。知乎内容让她明白，习惯不需要从宏大目标开始，真正重要的是让一件好事变得容易发生。',
     liu_kanshan_state: '我不是突然变得自律，只是重新找回了和自己安静相处的能力。',
+    liu_kanshan_image: '/images/liukanshan/reading-habit.png',
   },
   {
     id: 'main-cat-life',
@@ -198,6 +202,7 @@ export const mockCards: Card[] = [
     ],
     summary: '这段星尘从独居孤独开始，经过养宠前的信息搜索、责任评估和真实磨合，逐渐转向情感陪伴与生活秩序的建立。知乎内容提醒她，宠物不是用来填补空洞的物品，而是需要认真对待的生命。',
     liu_kanshan_state: '我原来只是想被陪伴，后来学会了怎样去陪伴。',
+    liu_kanshan_image: '/images/liukanshan/cat-life.png',
   },
 ]
 

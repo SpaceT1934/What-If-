@@ -293,6 +293,7 @@ onUnmounted(() => {
           <span class="star-ring" :style="{ borderColor: toneStyleMap[star.tone].ring }" />
           <span class="star-halo" :style="{ boxShadow: `0 0 42px ${toneStyleMap[star.tone].glow}` }" />
           <span class="star-noise" />
+          <img class="star-kanshan" :src="star.card.liu_kanshan_image || '/images/liukanshan-main.png'" alt="" />
 
           <div class="star-title-wrap">
             <p class="community-mark">{{ star.card.source_type === 'shared' ? '我分享的星尘' : '看山星尘' }}</p>
@@ -545,6 +546,7 @@ onUnmounted(() => {
 .star-ring,
 .star-halo,
 .star-noise,
+.star-kanshan,
 .star-title-wrap,
 .star-extra {
   position: absolute;
@@ -585,6 +587,22 @@ onUnmounted(() => {
     linear-gradient(180deg, transparent, rgba(2, 6, 23, 0.46));
   opacity: 0.5;
   pointer-events: none;
+}
+
+.star-kanshan {
+  right: 8%;
+  top: 8%;
+  z-index: 6;
+  width: 30%;
+  opacity: 0.96;
+  filter: saturate(1.02) brightness(1.05) drop-shadow(0 0 12px rgba(96, 165, 250, 0.24));
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.star-shell:hover .star-kanshan {
+  opacity: 0.95;
+  transform: translateY(-2px) scale(1.04);
 }
 
 .star-title-wrap {

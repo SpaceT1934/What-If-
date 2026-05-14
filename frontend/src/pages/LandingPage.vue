@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router'
 
 const showText = ref(false)
 const showButton = ref(false)
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'
 
 const leftFragments = [
   '长期阅读知乎高赞文章会改变认知吗？',
@@ -28,6 +29,12 @@ onMounted(() => {
     showButton.value = true
   }, 900)
 })
+
+const enterKanshanUniverse = () => {
+  const loginUrl = new URL(`${API_BASE}/api/auth/zhihu/login`)
+  loginUrl.searchParams.set('frontend', window.location.origin)
+  window.location.href = loginUrl.toString()
+}
 </script>
 
 <template>
@@ -83,15 +90,36 @@ onMounted(() => {
         探索平行人生的无限可能
       </p>
 
-      <RouterLink
-        to="/letter"
+      <div
         :class="[
-          'glass-btn mt-16 inline-flex items-center justify-center px-8 py-3.5 text-sm font-medium text-white transition-all duration-500',
+          'mt-16 flex flex-col items-center justify-center gap-3 transition-all duration-500 sm:flex-row',
           showButton ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0',
         ]"
       >
-        进入看山宇宙
-      </RouterLink>
+        <RouterLink
+          to="/letter"
+          class="glass-btn primary-guest inline-flex min-w-[190px] items-center justify-center px-8 py-3.5 text-sm font-medium text-white transition-all duration-500"
+        >
+          游客进入看山宇宙
+        </RouterLink>
+
+        <button
+          type="button"
+          class="glass-btn secondary-zhihu inline-flex min-w-[210px] items-center justify-center px-8 py-3.5 text-sm font-medium text-white transition-all duration-500"
+          @click="enterKanshanUniverse"
+        >
+          知乎登录并进入看山宇宙
+        </button>
+      </div>
+
+      <p
+        :class="[
+          'oauth-tip mx-auto mt-6 max-w-2xl rounded-2xl px-5 py-3 text-sm leading-7 text-slate-200/68 transition-all delay-150 duration-500',
+          showButton ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0',
+        ]"
+      >
+        如果登录失败，可重新进入本页面使用游客登录。建议在浏览器中使用知乎账号、手机号或验证码登录，不建议通过微信登录知乎。
+      </p>
     </section>
   </main>
 </template>
@@ -117,6 +145,13 @@ onMounted(() => {
   font-family: Inter, -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', 'HarmonyOS Sans', sans-serif;
   letter-spacing: 0;
   text-shadow: 0 0 12px rgba(226, 232, 240, 0.14), 0 0 32px rgba(96, 165, 250, 0.14);
+}
+
+.oauth-tip {
+  border: 1px solid rgba(191, 219, 254, 0.16);
+  background: rgba(15, 23, 42, 0.5);
+  box-shadow: 0 0 28px rgba(96, 165, 250, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
 }
 
 .cosmic-trails {
@@ -179,6 +214,19 @@ onMounted(() => {
   border-color: rgba(255, 255, 255, 0.26);
   background: rgba(255, 255, 255, 0.11);
   box-shadow: 0 0 24px rgba(147, 197, 253, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.primary-guest {
+  border-color: rgba(191, 219, 254, 0.24);
+  background: rgba(255, 255, 255, 0.11);
+  box-shadow: 0 0 24px rgba(147, 197, 253, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.secondary-zhihu {
+  color: rgba(226, 232, 240, 0.82);
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.055);
+  box-shadow: 0 0 16px rgba(96, 165, 250, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .thought-fragments {

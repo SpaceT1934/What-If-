@@ -42,6 +42,7 @@ const exploreCards: Card[] = [
     ],
     summary: '从月底焦虑到副业探索，他经历了盲目收藏、项目筛选、能力盘点和第一次交付。知乎内容没有直接给他一个财富答案，却让他意识到：真正可靠的副业，不是追风口，而是把自己的能力变得可被购买。',
     liu_kanshan_state: '我不是在追一个赚钱神话，而是在给未来的自己多留一条路。',
+    liu_kanshan_image: '/images/liukanshan/side-hustle.png',
   },
   {
     id: 'explore-career-choice',
@@ -78,6 +79,7 @@ const exploreCards: Card[] = [
     ],
     summary: '这段星尘呈现的是一个年轻人在职业分叉口上的真实摇摆。知乎内容让他看见不同选择背后的生活成本，也让他从“别人觉得哪个更好”，转向“哪个更适合现在的我”。',
     liu_kanshan_state: '我终于明白，人生的正确答案，不一定只有一个选项。',
+    liu_kanshan_image: '/images/liukanshan/career-choice.png',
   },
   {
     id: 'explore-love-movie',
@@ -120,6 +122,7 @@ const exploreCards: Card[] = [
     ],
     summary: '这段星尘从一部爱情电影开始，经过影评、择偶讨论和亲密关系内容的连续浏览，逐渐帮助用户从“追求心动”转向“理解适合”。她的爱情观不再只依赖浪漫想象，而开始拥有现实中的判断标准。',
     liu_kanshan_state: '我不是不相信爱情了，我只是终于知道，什么样的爱适合我。',
+    liu_kanshan_image: '/images/liukanshan/love-movie.png',
   },
   {
     id: 'explore-vlog-game',
@@ -162,6 +165,7 @@ const exploreCards: Card[] = [
     ],
     summary: '这段星尘记录的是一个普通用户从“想拍点东西”到“找到内容方向”的过程。知乎上的拍摄与剪辑内容，帮助他建立了基础方法，而游戏兴趣最终成为他的创作入口。',
     liu_kanshan_state: '我原来只是想记录生活，后来发现，我也可以讲出自己的故事。',
+    liu_kanshan_image: '/images/liukanshan/confusion.png',
   },
   {
     id: 'explore-fitness-habit',
@@ -201,6 +205,7 @@ const exploreCards: Card[] = [
     ],
     summary: '这段星尘不是关于减肥成功，而是关于习惯重建。用户从体检焦虑出发，通过知乎内容调整目标，把“必须高强度运动”改成“每天低门槛开始”，最终让运动成为生活的一部分。',
     liu_kanshan_state: '我不是突然变自律了，我只是学会了每天把自己捡回来一点点。',
+    liu_kanshan_image: '/images/liukanshan/fitness-habit.png',
   },
 ]
 

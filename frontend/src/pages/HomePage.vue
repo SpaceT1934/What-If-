@@ -222,7 +222,7 @@ const goDetail = (id: string) => {
           @keydown.space.prevent="goDetail(bubble.card.id)"
         >
           <div class="memory-scene" />
-          <img class="memory-kanshan" src="/images/liukanshan-main.png" alt="" />
+          <img class="memory-kanshan" :src="bubble.card.liu_kanshan_image || '/images/liukanshan-main.png'" alt="" />
           <div class="memory-noise" />
 
           <div class="memory-label">
@@ -708,14 +708,15 @@ const goDetail = (id: string) => {
 }
 
 .memory-kanshan {
-  right: 9%;
-  bottom: 12%;
-  width: 34%;
-  opacity: 0;
-  filter: blur(1.2px) saturate(0.7) brightness(0.96);
-  mix-blend-mode: screen;
+  right: 8%;
+  top: 8%;
+  z-index: 6;
+  width: 30%;
+  opacity: 0.96;
+  filter: saturate(1.02) brightness(1.05) drop-shadow(0 0 12px rgba(96, 165, 250, 0.24));
   transition: opacity 0.35s ease, transform 0.35s ease;
-  transform: translateY(10px);
+  transform: translateY(0);
+  pointer-events: none;
 }
 
 .memory-label {

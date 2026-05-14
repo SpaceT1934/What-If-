@@ -14,6 +14,7 @@ export type Card = {
   nodes: Node[]
   summary: string
   liu_kanshan_state: string
+  liu_kanshan_image?: string
   source_type?: 'mock' | 'guest' | 'parallel' | 'shared'
   parent_id?: string
   source_label?: string

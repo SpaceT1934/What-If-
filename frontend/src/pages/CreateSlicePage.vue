@@ -363,6 +363,7 @@ const joinUniverse = () => {
     })),
     summary: generatedSummary.value,
     liu_kanshan_state: generatedKanshanState.value,
+    liu_kanshan_image: '/images/liukanshan/confusion.png',
   }
   saveGuestStardust(card)
   showPreviewModal.value = false

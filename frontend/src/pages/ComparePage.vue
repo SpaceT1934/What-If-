@@ -178,6 +178,7 @@ const saveParallelStardust = () => {
     nodes: scenario.value.rewritten_nodes,
     summary: scenario.value.rewritten_summary,
     liu_kanshan_state: scenario.value.rewritten_liu_kanshan_state,
+    liu_kanshan_image: card.value.liu_kanshan_image,
     source_type: 'parallel',
     parent_id: card.value.id,
     source_label: '由 What If 平行宇宙推演',
